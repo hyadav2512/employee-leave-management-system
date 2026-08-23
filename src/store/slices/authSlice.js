@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import authService from '../../services/authService';
+import profileService from '../../services/profileService';
 import { AUTH_STORAGE_KEY } from '../../constants/storage';
 
 const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -16,6 +17,20 @@ export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI
       : 'Something went wrong. Please try again.');
     return thunkAPI.rejectWithValue(message);
   }
+});
+
+export const updateProfile = createAsyncThunk('auth/updateProfile', async (profile, thunkAPI) => {
+  try {
+    const response = await profileService.updateProfile(profile);
+    const savedAuth = { token: thunkAPI.getState().auth.token, user: { ...thunkAPI.getState().auth.user, ...response.user } };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(savedAuth));
+    return savedAuth.user;
+  } catch (error) { return thunkAPI.rejectWithValue(error.response?.data?.message || 'Unable to update profile. Please try again.'); }
+});
+
+export const changePassword = createAsyncThunk('auth/changePassword', async (passwords, thunkAPI) => {
+  try { return await authService.changePassword(passwords); }
+  catch (error) { return thunkAPI.rejectWithValue(error.response?.data?.message || 'Unable to change password. Please try again.'); }
 });
 
 const authSlice = createSlice({
@@ -51,7 +66,9 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Unable to sign in. Please try again.';
-      });
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => { state.user = action.payload; })
+      .addCase(updateProfile.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

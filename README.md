@@ -1,5 +1,37 @@
 # Getting Started with Create React App
 
+## Deploying to Vercel
+
+Deploy the frontend and backend as two Vercel projects from this repository.
+
+### Backend project
+
+1. Import the repository into Vercel.
+2. Set **Root Directory** to `server`.
+3. Leave the framework as **Other** and deploy.
+4. Add these environment variables:
+	- `JWT_SECRET`: a long random production secret
+	- `FRONTEND_URL`: the deployed frontend URL
+
+The backend exposes its serverless handler from `server/api/index.js`. The deployed API URL will be similar to `https://your-api.vercel.app`.
+
+### Frontend project
+
+1. Import the same repository as a second Vercel project.
+2. Keep **Root Directory** at the repository root.
+3. Use the Create React App build settings:
+	- Build command: `npm run build`
+	- Output directory: `build`
+4. Add `REACT_APP_API_URL` with the backend URL and `/api`, for example:
+	`https://your-api.vercel.app/api`
+5. Deploy.
+
+The root `vercel.json` keeps React Router routes working after refresh.
+
+### Important storage note
+
+The current backend uses in-memory demo data. It works for a demo deployment, but Vercel serverless instances are not persistent storage. For production, move users and leave requests to a database such as MongoDB and store profile images in object storage.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

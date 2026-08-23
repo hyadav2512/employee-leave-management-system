@@ -13,6 +13,18 @@ const leaveService = {
     const response = await api.post('/leaves', request);
     return response.data;
   },
+  async getLeaveRequests(params) {
+    const response = await api.get('/leaves', { params });
+    return response.data;
+  },
+  async getLeaveRequest(id) {
+    const response = await api.get(`/leaves/${id}`);
+    return response.data;
+  },
+  async cancelLeaveRequest(id) {
+    const response = await api.patch(`/leaves/${id}/cancel`);
+    return response.data;
+  },
 };
 
 export default leaveService;

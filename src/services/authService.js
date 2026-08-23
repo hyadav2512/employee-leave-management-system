@@ -5,6 +5,10 @@ const authService = {
     const response = await api.post('/auth/login', credentials);
     return response.data;
   },
+  async changePassword(passwords) {
+    const response = await api.patch('/auth/change-password', passwords);
+    return response.data;
+  },
 };
 
 export default authService;

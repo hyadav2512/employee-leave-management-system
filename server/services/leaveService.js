@@ -1,5 +1,6 @@
 const LeaveRequest = require('../models/LeaveRequest');
 const { calculateWorkingDays, parseDate } = require('../utils/dateUtils');
+const { paginate } = require('../utils/pagination');
 
 const leaveTypes = [
   { id: 'casual', name: 'Casual Leave', active: true },
@@ -34,6 +35,38 @@ function getLeaveBalance(employeeId) {
     const balance = employeeBalances[type.name] || { allocated: 0, used: 0 };
     return { type: type.name, allocated: balance.allocated, used: balance.used, remaining: balance.allocated - balance.used };
   });
+}
+
+function listLeaveRequests(employeeId, query = {}) {
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(Number.parseInt(query.limit, 10) || 10, 1), 50);
+  const search = typeof query.search === 'string' ? query.search.trim().toLowerCase() : '';
+  const allowedStatuses = ['Pending', 'Approved', 'Rejected', 'Cancelled'];
+  const status = allowedStatuses.includes(query.status) ? query.status : '';
+  const leaveType = typeof query.leaveType === 'string' ? query.leaveType : '';
+  const startDate = parseDate(query.startDate) ? query.startDate : '';
+  const endDate = parseDate(query.endDate) ? query.endDate : '';
+  const sortBy = ['startDate', 'endDate', 'createdAt'].includes(query.sortBy) ? query.sortBy : 'createdAt';
+  const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
+
+  const filtered = LeaveRequest.findByEmployee(employeeId).filter((request) => {
+    const matchesSearch = !search || request.leaveType.toLowerCase().includes(search) || request.reason.toLowerCase().includes(search);
+    return matchesSearch && (!status || request.status === status) && (!leaveType || request.leaveType === leaveType)
+      && (!startDate || request.startDate >= startDate) && (!endDate || request.endDate <= endDate);
+  }).sort((left, right) => (left[sortBy] > right[sortBy] ? sortOrder : left[sortBy] < right[sortBy] ? -sortOrder : 0));
+
+  return paginate(filtered.map((request) => ({ ...request })), page, limit);
+}
+
+function getLeaveRequest(employeeId, id) {
+  return LeaveRequest.findByIdForEmployee(id, employeeId);
+}
+
+function cancelLeaveRequest(employeeId, id) {
+  const request = LeaveRequest.findByIdForEmployee(id, employeeId);
+  if (!request) throw new LeaveValidationError('Leave request not found.', 404);
+  if (request.status !== 'Pending') throw new LeaveValidationError('Only pending leave requests can be cancelled.', 400);
+  return LeaveRequest.updateStatus(id, employeeId, 'Cancelled');
 }
 
 function createLeaveRequest(employeeId, input) {
@@ -73,4 +106,4 @@ function createLeaveRequest(employeeId, input) {
   return LeaveRequest.create({ employee: employeeId, leaveType, startDate, endDate, numberOfDays, reason: reason.trim(), attachment: null });
 }
 
-module.exports = { LeaveValidationError, createLeaveRequest, getLeaveBalance, getLeaveTypes };
+module.exports = { LeaveValidationError, cancelLeaveRequest, createLeaveRequest, getLeaveBalance, getLeaveRequest, getLeaveTypes, listLeaveRequests };

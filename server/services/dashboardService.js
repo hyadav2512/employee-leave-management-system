@@ -30,8 +30,7 @@ function getEmployeeDashboard(userId) {
   const base = dashboardData[userId] || { leaveBalances: [], statistics: { pendingRequests: 0, approvedRequests: 0, rejectedRequests: 0, upcomingLeaveDays: 0 }, upcomingLeaves: [], recentActivity: [] };
   const requests = LeaveRequest.findByEmployee(userId);
   const knownIds = new Set(base.recentActivity.map((request) => request.id));
-  const newRequests = requests.filter((request) => !knownIds.has(request.id));
-  const mappedRequests = newRequests.map((request) => ({
+  const mappedRequests = requests.map((request) => ({
     id: request.id,
     type: request.leaveType,
     startDate: request.startDate,
@@ -40,16 +39,16 @@ function getEmployeeDashboard(userId) {
     status: request.status,
     appliedDate: request.createdAt.slice(0, 10),
   }));
-  const pendingRequests = newRequests.filter((request) => request.status === 'Pending').length;
-  const upcomingLeaveDays = newRequests
-    .filter((request) => request.status === 'Pending' && request.startDate >= new Date().toISOString().slice(0, 10))
+  const pendingRequests = requests.filter((request) => request.status === 'Pending').length;
+  const upcomingLeaveDays = requests
+    .filter((request) => ['Pending', 'Approved'].includes(request.status) && request.startDate >= new Date().toISOString().slice(0, 10))
     .reduce((total, request) => total + request.numberOfDays, 0);
 
   return {
     ...base,
-    statistics: { ...base.statistics, pendingRequests: base.statistics.pendingRequests + pendingRequests, upcomingLeaveDays: base.statistics.upcomingLeaveDays + upcomingLeaveDays },
-    upcomingLeaves: [...mappedRequests.filter((request) => request.startDate >= new Date().toISOString().slice(0, 10)), ...base.upcomingLeaves],
-    recentActivity: [...mappedRequests, ...base.recentActivity],
+    statistics: { ...base.statistics, pendingRequests, approvedRequests: requests.filter((request) => request.status === 'Approved').length, rejectedRequests: requests.filter((request) => request.status === 'Rejected').length, upcomingLeaveDays },
+    upcomingLeaves: mappedRequests.filter((request) => ['Pending', 'Approved'].includes(request.status) && request.startDate >= new Date().toISOString().slice(0, 10)),
+    recentActivity: [...mappedRequests, ...base.recentActivity.filter((request) => !knownIds.has(request.id))],
   };
 }
 

@@ -15,6 +15,18 @@ function findByEmployee(employeeId) {
   return leaveRequests.filter((request) => request.employee === employeeId);
 }
 
+function findByIdForEmployee(id, employeeId) {
+  return leaveRequests.find((request) => request.id === id && request.employee === employeeId) || null;
+}
+
+function updateStatus(id, employeeId, status) {
+  const request = findByIdForEmployee(id, employeeId);
+  if (!request) return null;
+  request.status = status;
+  request.updatedAt = new Date().toISOString();
+  return request;
+}
+
 function create(request) {
   const now = new Date().toISOString();
   const savedRequest = { id: `leave-${nextId++}`, ...request, status: 'Pending', createdAt: now, updatedAt: now };
@@ -22,4 +34,4 @@ function create(request) {
   return savedRequest;
 }
 
-module.exports = { create, findByEmployee };
+module.exports = { create, findByEmployee, findByIdForEmployee, updateStatus };

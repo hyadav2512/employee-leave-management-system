@@ -6,9 +6,9 @@ import './AuthenticatedLayout.css';
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', enabled: true },
   { label: 'Apply Leave', to: '/apply-leave', enabled: true },
-  { label: 'My Leaves', to: '/my-leaves' },
+  { label: 'My Leaves', to: '/my-leaves', enabled: true },
   { label: 'Team Calendar', to: '/team-calendar' },
-  { label: 'Profile', to: '/profile' },
+  { label: 'Profile', to: '/profile', enabled: true },
 ];
 
 function AuthenticatedLayout() {
