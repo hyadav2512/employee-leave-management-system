@@ -1,10 +1,11 @@
 import './App.css';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login/Login';
-import Dashboard from './pages/Dashboard/Dashboard';
+import Login from './ui/screens/Login';
+import Dashboard from './ui/screens/Dashboard';
+import ApplyLeave from './ui/screens/ApplyLeave';
 import ProtectedRoute from './routes/ProtectedRoute';
-import AuthenticatedLayout from './layouts/AuthenticatedLayout';
-import ComingSoon from './components/common/ComingSoon';
+import AuthenticatedLayout from './ui/shared/AuthenticatedLayout';
+import ComingSoon from './ui/shared/ComingSoon';
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AuthenticatedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/apply-leave" element={<ComingSoon />} />
+          <Route path="/apply-leave" element={<ApplyLeave />} />
           <Route path="/my-leaves" element={<ComingSoon />} />
           <Route path="/team-calendar" element={<ComingSoon />} />
           <Route path="/profile" element={<ComingSoon />} />

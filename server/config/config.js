@@ -1,1 +1,4 @@
-module.exports = { port: process.env.PORT || 5000, jwtSecret: process.env.JWT_SECRET || 'development-only-change-me' };
+module.exports = {
+    port: process.env.PORT || 5000,
+    jwtSecret: process.env.JWT_SECRET || 'development-only-change-me'
+};

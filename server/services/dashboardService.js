@@ -1,3 +1,5 @@
+const LeaveRequest = require('../models/LeaveRequest');
+
 const dashboardData = {
   'employee-001': {
     leaveBalances: [
@@ -25,7 +27,30 @@ const dashboardData = {
 };
 
 function getEmployeeDashboard(userId) {
-  return dashboardData[userId] || { leaveBalances: [], statistics: { pendingRequests: 0, approvedRequests: 0, rejectedRequests: 0, upcomingLeaveDays: 0 }, upcomingLeaves: [], recentActivity: [] };
+  const base = dashboardData[userId] || { leaveBalances: [], statistics: { pendingRequests: 0, approvedRequests: 0, rejectedRequests: 0, upcomingLeaveDays: 0 }, upcomingLeaves: [], recentActivity: [] };
+  const requests = LeaveRequest.findByEmployee(userId);
+  const knownIds = new Set(base.recentActivity.map((request) => request.id));
+  const newRequests = requests.filter((request) => !knownIds.has(request.id));
+  const mappedRequests = newRequests.map((request) => ({
+    id: request.id,
+    type: request.leaveType,
+    startDate: request.startDate,
+    endDate: request.endDate,
+    days: request.numberOfDays,
+    status: request.status,
+    appliedDate: request.createdAt.slice(0, 10),
+  }));
+  const pendingRequests = newRequests.filter((request) => request.status === 'Pending').length;
+  const upcomingLeaveDays = newRequests
+    .filter((request) => request.status === 'Pending' && request.startDate >= new Date().toISOString().slice(0, 10))
+    .reduce((total, request) => total + request.numberOfDays, 0);
+
+  return {
+    ...base,
+    statistics: { ...base.statistics, pendingRequests: base.statistics.pendingRequests + pendingRequests, upcomingLeaveDays: base.statistics.upcomingLeaveDays + upcomingLeaveDays },
+    upcomingLeaves: [...mappedRequests.filter((request) => request.startDate >= new Date().toISOString().slice(0, 10)), ...base.upcomingLeaves],
+    recentActivity: [...mappedRequests, ...base.recentActivity],
+  };
 }
 
 module.exports = { getEmployeeDashboard };

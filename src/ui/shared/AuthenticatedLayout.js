@@ -1,11 +1,11 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../store/slices/authSlice';
+import { logout } from '../../store/slices/authSlice';
 import './AuthenticatedLayout.css';
 
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', enabled: true },
-  { label: 'Apply Leave', to: '/apply-leave' },
+  { label: 'Apply Leave', to: '/apply-leave', enabled: true },
   { label: 'My Leaves', to: '/my-leaves' },
   { label: 'Team Calendar', to: '/team-calendar' },
   { label: 'Profile', to: '/profile' },

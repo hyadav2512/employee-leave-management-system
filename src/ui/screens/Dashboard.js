@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchDashboard } from '../../store/slices/dashboardSlice';
 import LeaveBalanceCard from './LeaveBalanceCard';
 import StatisticsCard from './StatisticsCard';
@@ -12,6 +12,7 @@ import './Dashboard.css';
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector((state) => state.auth.user);
   const { data, loading, error } = useSelector((state) => state.dashboard);
 
@@ -27,6 +28,7 @@ function Dashboard() {
   return (
     <main className="page-shell">
       <div className="dashboard-main">
+        {location.state?.notification && <div className="dashboard-notification" role="status">{location.state.notification}</div>}
         <header className="dashboard-heading"><div><p className="section-eyebrow">Overview</p><h1>{greeting}, {firstName}</h1><p>Here's your leave overview.</p></div><time dateTime={new Date().toISOString()}>{readableDate}</time></header>
         <section aria-labelledby="balances-title"><div className="section-heading compact"><div><p className="section-eyebrow">Time off</p><h2 id="balances-title">Leave balance</h2></div></div><div className="balance-grid">{data.leaveBalances.map((balance) => <LeaveBalanceCard key={balance.type} balance={balance} />)}</div></section>
         <section aria-labelledby="stats-title"><h2 className="visually-hidden" id="stats-title">Leave request statistics</h2><div className="stats-grid"><StatisticsCard label="Pending requests" value={data.statistics.pendingRequests} tone="pending" /><StatisticsCard label="Approved requests" value={data.statistics.approvedRequests} tone="approved" /><StatisticsCard label="Rejected requests" value={data.statistics.rejectedRequests} tone="rejected" /><StatisticsCard label="Upcoming leave days" value={data.statistics.upcomingLeaveDays} tone="upcoming" /></div></section>

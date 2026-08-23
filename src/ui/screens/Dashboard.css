@@ -1,4 +1,5 @@
 .dashboard-main { max-width: 1200px; margin: 0 auto; }
+.dashboard-notification { margin-bottom: 24px; padding: 13px 16px; border-left: 3px solid #3b8581; background: #edf5f4; color: #287253; font-size: .86rem; }
 .dashboard-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 38px; }
 .dashboard-heading h1 { margin: 4px 0 8px; color: #173c45; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.1; }
 .dashboard-heading > div > p:last-child, .dashboard-heading time { margin: 0; color: #6b8185; }
